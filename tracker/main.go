@@ -7,7 +7,7 @@ import (
 	"syscall"
 	"time"
 
-	Core "github.com/eyedeekay/tracker"
+	Core "github.com/eyedeekay/opentracker"
 	"github.com/i19/autorestart"
 	"github.com/vvampirius/retracker/core/common"
 )
