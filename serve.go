@@ -1,12 +1,15 @@
 package samcore
 
 import (
-	"net/http"
-	//"fmt"
+	"fmt"
+	"io/ioutil"
 	"log"
+	"net"
+	"net/http"
 
 	"github.com/gorilla/websocket"
 	"github.com/justinas/alice"
+	//	"github.com/vvampirius/retracker/bittorrent/tracker"
 	"github.com/vvampirius/retracker/core/common"
 	Receiver "github.com/vvampirius/retracker/core/receiver"
 	Storage "github.com/vvampirius/retracker/core/storage"
@@ -16,6 +19,12 @@ import (
 	"github.com/eyedeekay/sam3"
 	"github.com/eyedeekay/sam3/i2pkeys"
 	"os"
+)
+
+var (
+	ln net.Listener
+	//  storage *Announce
+	core Core
 )
 
 var upgrader = websocket.Upgrader{
@@ -76,37 +85,89 @@ func wsMiddleware(next http.Handler) http.Handler {
 			return
 		}
 		for {
-			messageType, p, err := conn.ReadMessage()
+			messageType, _, err := conn.ReadMessage()
 			if err != nil {
 				log.Println(err)
 				return
 			}
-			if err := conn.WriteMessage(messageType, p); err != nil {
-				log.Println(err)
-				return
+
+			//xrealip := r.Header.Get(`X-Real-IP`)
+			xi2pdest := r.Header.Get(`X-I2p-Dest-Base64`)
+			compact := r.URL.Query().Get(`compact`)
+			/*
+				if self.Logger != nil {
+				  self.Logger.Printf("%s %s %s %s\n", r.RemoteAddr, xrealip, r.RequestURI, r.UserAgent())
+				}
+			*/
+			rr := core.Receiver.Announce.ProcessAnnounce(
+				xi2pdest,
+				r.URL.Query().Get(`info_hash`),
+				r.URL.Query().Get(`peer_id`),
+				r.URL.Query().Get(`port`),
+				r.URL.Query().Get(`uploaded`),
+				r.URL.Query().Get(`downloaded`),
+				r.URL.Query().Get(`left`),
+				r.URL.Query().Get(`ip`),
+				r.URL.Query().Get(`numwant`),
+				r.URL.Query().Get(`event`),
+				compact,
+			)
+			if d, err := rr.Bencode(); err == nil {
+				fmt.Fprint(w, d)
+				if err := conn.WriteMessage(messageType, []byte(d)); err != nil {
+					log.Println(err)
+					return
+				}
+			} else {
+				//self.Logger.Println(err.Error())
 			}
+
 		}
 	})
 }
 
+func homeHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "text/html")
+	fmt.Fprintf(w, "<!DOCTYPE html>")
+	fmt.Fprintf(w, "<html>")
+	fmt.Fprintf(w, "  <body>")
+	fmt.Fprintf(w, "    <h1>Rhizome Open Tracker:</h1>")
+	fmt.Fprintf(w, "    <ul>")
+	fmt.Fprintf(w, "      <li>")
+	fmt.Fprintf(w, "        <span>Base32 URL: </span>")
+	fmt.Fprintf(w, "        <a href=\"http://%s\"/>%s</a>", ln.Addr().(i2pkeys.I2PAddr).Base32(), ln.Addr().(i2pkeys.I2PAddr).Base32())
+	fmt.Fprintf(w, "      </li>")
+	fmt.Fprintf(w, "      <li>")
+	fmt.Fprintf(w, "        <span>Address Helper: </span>")
+	fmt.Fprintf(w, "        <a href=\"http://%s.%s.i2p/?i2paddresshelper=%s\"/>%s.%s</a>", ln.Addr().(i2pkeys.I2PAddr).Base32()[0:5], "rhz-ot", ln.Addr(), ln.Addr().(i2pkeys.I2PAddr).Base32()[0:5], "rhz-ot.i2p")
+	fmt.Fprintf(w, "      </li>")
+	fmt.Fprintf(w, "    </ul>")
+	fmt.Fprintf(w, "</body>")
+	fmt.Fprintf(w, "</html>")
+}
+
 func New(config *common.Config) (*Core, error) {
 	storage := Storage.New(config)
-	core := Core{
+	core = Core{
 		Config:   config,
 		Storage:  storage,
 		Receiver: Receiver.New(config, storage),
 	}
-	ln, err := Sammy()
+	var err error
+	ln, err = Sammy()
 	if err != nil {
 		return nil, err
 	}
+	defer ln.Close()
 	ws := alice.New(wsMiddleware)
+	http.HandleFunc("/", homeHandler)
 	http.Handle("/announce", ws.Then(http.HandlerFunc(core.Receiver.Announce.HttpHandler)))
 	http.Handle("/a", ws.Then(http.HandlerFunc(core.Receiver.Announce.HttpHandler)))
 	http.Handle("/ws/announce", ws.Then(http.HandlerFunc(core.Receiver.Announce.HttpHandler)))
 	http.Handle("/ws/a", ws.Then(http.HandlerFunc(core.Receiver.Announce.HttpHandler)))
 	http.Handle("/announce/ws", ws.Then(http.HandlerFunc(core.Receiver.Announce.HttpHandler)))
 	http.Handle("/a/ws", ws.Then(http.HandlerFunc(core.Receiver.Announce.HttpHandler)))
+	ioutil.WriteFile("keys.base32.txt", []byte(ln.Addr().(i2pkeys.I2PAddr).Base32()), 0644)
 	if err := http.Serve(ln, nil); err != nil { // set listen port
 		return nil, err
 	}

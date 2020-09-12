@@ -3,17 +3,16 @@ package main
 import (
 	"flag"
 	"fmt"
-	Core "github.com/eyedeekay/tracker"
-	"github.com/vvampirius/retracker/core/common"
 	"os"
 	"syscall"
+	"time"
+
+	Core "github.com/eyedeekay/tracker"
+	"github.com/i19/autorestart"
+	"github.com/vvampirius/retracker/core/common"
 )
 
-const VERSION = 0.2
-
-func PrintRepo() {
-	fmt.Fprintln(os.Stderr, "\n# https://github.com/vvampirius/retracker")
-}
+var config common.Config
 
 func main() {
 	flag.Usage = func() {
@@ -21,10 +20,8 @@ func main() {
 		flag.PrintDefaults()
 		PrintRepo()
 	}
-	listen := flag.String("l", ":80", "Listen address:port")
-	age := flag.Float64("a", 180, "Keep 'n' minutes peer in memory")
+	age := flag.Float64("a", 1800, "Keep 'n' minutes peer in memory")
 	debug := flag.Bool("d", false, "Debug mode")
-	xrealip := flag.Bool("x", false, "Get RemoteAddr from X-Real-IP header")
 	ver := flag.Bool("v", false, "Show version")
 	flag.Parse()
 
@@ -34,12 +31,27 @@ func main() {
 		syscall.Exit(0)
 	}
 
-	config := common.Config{
-		Listen:  *listen,
+	config = common.Config{
+		Listen:  "127.0.0.1:80",
 		Debug:   *debug,
 		Age:     *age,
-		XRealIP: *xrealip,
+		XRealIP: false,
 	}
 
+	autorestart.Run(worker)
+}
+
+const VERSION = 0.2
+
+func PrintRepo() {
+	fmt.Fprintln(os.Stderr, "\n# https://github.com/vvampirius/retracker")
+}
+
+func worker() {
 	Core.New(&config)
+	for i := 0; i <= 10; i++ {
+		time.Sleep(time.Second)
+		fmt.Println(i)
+	}
+	panic("Panicing ... ")
 }
