@@ -1,0 +1,13 @@
+github.com/eyedeekay/retracker v0.0.0-20191208024817-1068d9dccb6d h1:OrYEqYkav2QZdBSwXQ8iqsnbZv0KQkWXbnCl7WZsH4c=
+github.com/eyedeekay/retracker v0.0.0-20191208024817-1068d9dccb6d/go.mod h1:YCuBD/+cyrDyP54x/snTfObZgpjJ61TVRG1r5mEov+w=
+github.com/eyedeekay/sam3 v0.32.3 h1:PW1vQoo2H7c3Q4l2DngJqpSdsdJprMCk9NOkUHtcdmM=
+github.com/eyedeekay/sam3 v0.32.3/go.mod h1:qRA9KIIVxbrHlkj+ZB+OoxFGFgdKeGp1vSgPw26eOVU=
+github.com/gorilla/websocket v1.4.2 h1:+/TMaTYc4QFitKJxsQ7Yye35DkWvkdLcvGKqM+x0Ufc=
+github.com/gorilla/websocket v1.4.2/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=
+github.com/justinas/alice v1.2.0 h1:+MHSA/vccVCF4Uq37S42jwlkvI2Xzl7zTPCN5BnZNVo=
+github.com/justinas/alice v1.2.0/go.mod h1:fN5HRH/reO/zrUflLfTN43t3vXvKzvZIENsNEe7i7qA=
+github.com/vvampirius/retracker v0.0.0-20171226134001-fdbec17ad537 h1:tzwfH/icuZbxYWB2YL94pB+TsgYDtV++E5OAtVok//k=
+github.com/vvampirius/retracker v0.0.0-20171226134001-fdbec17ad537/go.mod h1:dleUEOn/BmkTNbOn5w6w3XXg8pL4OaOCMH066oaL7cE=
+github.com/zeebo/bencode v0.0.0-20171107213702-3bb23f1b4385/go.mod h1:Ct7CkrWIQuLWAy9M3atFHYq4kG9Ao/SsY5cdtCXmp9Y=
+github.com/zeebo/bencode v1.0.0 h1:zgop0Wu1nu4IexAZeCZ5qbsjU4O1vMrfCrVgUjbHVuA=
+github.com/zeebo/bencode v1.0.0/go.mod h1:Ct7CkrWIQuLWAy9M3atFHYq4kG9Ao/SsY5cdtCXmp9Y=
