@@ -1,4 +1,4 @@
-module github.com/eyedeekay/tracker
+module github.com/eyedeekay/opentracker
 
 go 1.14
 
