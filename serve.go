@@ -6,6 +6,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"encoding/json"
 
 	"github.com/gorilla/websocket"
 	"github.com/justinas/alice"
@@ -85,32 +86,29 @@ func wsMiddleware(next http.Handler) http.Handler {
 			return
 		}
 		for {
-			messageType, _, err := conn.ReadMessage()
+			messageType, p, err := conn.ReadMessage()
 			if err != nil {
 				log.Println(err)
 				return
 			}
+			var dat map[string]interface{}
+      if err := json.Unmarshal(p, &dat); err != nil {
+				log.Println(err)
+        return
+      }
 
-			//xrealip := r.Header.Get(`X-Real-IP`)
-			xi2pdest := r.Header.Get(`X-I2p-Dest-Base64`)
-			compact := r.URL.Query().Get(`compact`)
-			/*
-				if self.Logger != nil {
-				  self.Logger.Printf("%s %s %s %s\n", r.RemoteAddr, xrealip, r.RequestURI, r.UserAgent())
-				}
-			*/
 			rr := core.Receiver.Announce.ProcessAnnounce(
-				xi2pdest,
-				r.URL.Query().Get(`info_hash`),
-				r.URL.Query().Get(`peer_id`),
-				r.URL.Query().Get(`port`),
-				r.URL.Query().Get(`uploaded`),
-				r.URL.Query().Get(`downloaded`),
-				r.URL.Query().Get(`left`),
-				r.URL.Query().Get(`ip`),
-				r.URL.Query().Get(`numwant`),
-				r.URL.Query().Get(`event`),
-				compact,
+				dat[`X-I2p-Dest-Base64`].(string),
+				dat[`info_hash`].(string),
+				dat[`peer_id`].(string),
+				dat[`port`].(string),
+				dat[`uploaded`].(string),
+				dat[`downloaded`].(string),
+				dat[`left`].(string),
+				dat[`ip`].(string),
+				dat[`numwant`].(string),
+				dat[`event`].(string),
+				dat[`compact`].(string),
 			)
 			if d, err := rr.Bencode(); err == nil {
 				fmt.Fprint(w, d)
