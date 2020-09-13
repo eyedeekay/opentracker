@@ -1,12 +1,12 @@
 package samcore
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
-	"encoding/json"
 
 	"github.com/gorilla/websocket"
 	"github.com/justinas/alice"
@@ -92,10 +92,10 @@ func wsMiddleware(next http.Handler) http.Handler {
 				return
 			}
 			var dat map[string]interface{}
-      if err := json.Unmarshal(p, &dat); err != nil {
+			if err := json.Unmarshal(p, &dat); err != nil {
 				log.Println(err)
-        return
-      }
+				return
+			}
 
 			rr := core.Receiver.Announce.ProcessAnnounce(
 				dat[`X-I2p-Dest-Base64`].(string),
