@@ -8,7 +8,7 @@ import (
 	"time"
 
 	Core "github.com/eyedeekay/opentracker"
-	"github.com/i19/autorestart"
+	//"github.com/i19/autorestart"
 	"github.com/vvampirius/retracker/core/common"
 )
 
@@ -38,13 +38,17 @@ func main() {
 		XRealIP: false,
 	}
 
-	autorestart.Run(worker)
+	//	autorestart.Run(worker)
+	_, err := Core.New(&config)
+	if err != nil {
+		panic(err)
+	}
 }
 
 const VERSION = 0.2
 
 func PrintRepo() {
-	fmt.Fprintln(os.Stderr, "\n# https://github.com/vvampirius/retracker")
+	fmt.Fprintln(os.Stderr, "\n# https://github.com/eyedeekay/opentracker")
 }
 
 func worker() {

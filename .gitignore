@@ -1,3 +1,5 @@
 tracker/keys.i2pkeys
+tracker/*.crl
+tracker/*.pem
 tracker/tracker
 
